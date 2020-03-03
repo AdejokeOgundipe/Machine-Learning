@@ -1,0 +1,103 @@
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import numpy as np
+import os
+import cv2
+import pandas as pd
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten,Conv2D, MaxPooling2D
+import pickle
+
+DATADIR ="/content/drive/My Drive/Colab Notebooks/Datasets/Cats and dogs/cat-and-dog/test_set/test_set"
+CATEGORIES = ["cats", "dogs"]
+
+for category in CATEGORIES:
+  path = os.path.join(DATADIR, category)
+  for img in os.listdir(path):
+    img_array = cv2.imread(os.path.join(path,img), cv2.IMREAD_GRAYSCALE)
+    plt.imshow(img_array, cmap ="gray")
+    plt.show()
+    break
+  break
+
+
+
+// this is another line of the code
+print(img_array.shape)
+
+
+IMG_SIZE = 50 
+new_array = cv2.resize(img_array,(IMG_SIZE, IMG_SIZE))
+plt.imshow(new_array, cmap ='gray')
+
+
+training_set =[]
+def creating_training_dataset():
+  for category in CATEGORIES:
+    path = os.path.join(DATADIR, category)
+    class_num = CATEGORIES.index(category)
+    for img in os.listdir(path):
+      try:
+        img_array = cv2.imread(os.path.join(path,img), cv2.IMREAD_GRAYSCALE)
+        new_array = cv2.resize(img_array,(IMG_SIZE, IMG_SIZE))
+        training_set.append([new_array, class_num])
+      except Exception as e:
+        pass 
+creating_training_dataset()
+
+
+
+print(len(training_set))
+
+import random
+random.shuffle(training_set)
+
+
+for sample in training_set[:10]:
+  print(sample[1])
+
+x =[]
+y=[]
+
+// for extracting feature and for training
+for features,label in training_set:
+  x.append(features)
+  y.append(label)
+
+
+// new
+import pickle
+pickle_out = open("x.pickle","wb")
+pickle.dump(x,pickle_out)
+pickle_out.close()
+
+pickle_out =open("y.pickle", "wb")
+pickle.dump(y,pickle_out)
+
+
+//new 
+x[1]
+X = x/255.0
+
+
+model = Sequential()
+model.add(Conv2D(32, (3, 3), input_shape = x.shape[1:]))
+model.add(Activation("relu"))
+model.add(MaxPooling2D(pool_size =(2,2)))
+
+model.add(Conv2D(32, (3,3)))
+model.add(Activation("relu"))
+model.add(MaxPooling2D(pool_size =(2,2)))
+
+model.add(Flatten())
+model.add(Dense(64))
+
+model.add(Dense(1))
+model.add(activation("sigmoid"))
+
+model.compile(loss ="binary_crossentropy", optimiser="adam", metrics = ['accuracy'])
+
+model.fit(X,y, batch_size=32, epochs=3, validation_split=0.1)
+pickle_out.close()
+x = np.array(x).reshape(-1, IMG_SIZE, 1)
+plt.show()
